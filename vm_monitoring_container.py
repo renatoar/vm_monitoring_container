@@ -1,6 +1,8 @@
 import time
 import requests
+from pymongo import MongoClient
 from datetime import datetime
+database = MongoClient('localhost:17017')['vm_monitoring']['metricas']
 
 mins = 0
 #URL base
@@ -10,8 +12,7 @@ URL_cpu = '(1-avg(irate(node_cpu_seconds_total{mode="idle"}[10m]))by(instance))*
 URL_mem = '(node_memory_MemTotal_bytes-node_memory_MemAvailable_bytes)*100'
 URL_tx = 'sum(node_network_receive_bytes_total)by(instance)'
 URL_rx = 'sum(node_network_transmit_bytes_total)by(instance)'
-while mins != 1:
-    time.sleep(1)
+while mins != 10:
     r = requests.get(url = base + URL_cpu)
     j = requests.get(url = base + URL_mem)
     p = requests.get(url = base + URL_tx)
@@ -21,7 +22,6 @@ while mins != 1:
     dados_nettx = p.json()
     dados_netrx = q.json()
     qtd_nodes = len(dados_mem["data"]["result"])
-    array_nodes = []
     for x in range(0, qtd_nodes) :
         timestamp = datetime.fromtimestamp(dados_cpu["data"]["result"][x]["value"][0])
         timestampStr = timestamp.strftime("%d-%b-%Y - %H:%M:%S")
@@ -31,14 +31,8 @@ while mins != 1:
         byte_tx = dados_nettx["data"]["result"][x]["value"][1] + " Bs"
         byte_rx = dados_netrx["data"]["result"][x]["value"][1] + " Bs"
         
-        array_nodes.append([
-            timestampStr,
-            name_node,
-            cpu_usage,
-            mem_usage,
-            byte_rx,
-            byte_tx
-        ])
-        print (array_nodes[x])   
-    #Salvar variaveis no bd
+        resposta = client[timestampStr].insert_one({'timestap': timestampStr, 'name_node': name_node, 'cpu_usage': cpu_usage, 'mem_usage' : mem_usage, 'byte_tx': byte_tx, 'byte_rx': byte_rx})
+        print(resposta)
+
+    time.sleep(15)
     mins += 1
