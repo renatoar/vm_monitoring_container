@@ -12,7 +12,7 @@ URL_cpu = '(1-avg(irate(node_cpu_seconds_total{mode="idle"}[10m]))by(instance))*
 URL_mem = '(node_memory_MemTotal_bytes-node_memory_MemAvailable_bytes)*100'
 URL_tx = 'sum(node_network_receive_bytes_total)by(instance)'
 URL_rx = 'sum(node_network_transmit_bytes_total)by(instance)'
-while mins != 10:
+while True:
     r = requests.get(url = base + URL_cpu)
     j = requests.get(url = base + URL_mem)
     p = requests.get(url = base + URL_tx)
