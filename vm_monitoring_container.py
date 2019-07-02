@@ -2,7 +2,7 @@ import time
 import requests
 from pymongo import MongoClient
 from datetime import datetime
-database = MongoClient('localhost:17017')['vm_monitoring']['metricas']
+client = MongoClient('localhost:17017')['vm_monitoring']['metricas']
 
 mins = 0
 #URL base
